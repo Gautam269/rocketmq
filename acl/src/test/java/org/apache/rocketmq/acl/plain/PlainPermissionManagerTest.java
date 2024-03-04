@@ -41,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.Assert.assertThrows;
+
 public class PlainPermissionManagerTest {
 
     PlainPermissionManager plainPermissionManager;
@@ -273,18 +275,18 @@ public class PlainPermissionManagerTest {
 
     @Test
     public void updateAccessConfigTest() {
-        Assert.assertThrows(AclException.class, () -> plainPermissionManager.updateAccessConfig(null));
+        assertThrows(AclException.class, () -> plainPermissionManager.updateAccessConfig(null));
 
         plainAccessConfig.setAccessKey("admin_test");
         // Invalid parameter
         plainAccessConfig.setSecretKey("123456");
         plainAccessConfig.setAdmin(true);
-        Assert.assertThrows(AclException.class, () -> plainPermissionManager.updateAccessConfig(plainAccessConfig));
+        assertThrows(AclException.class, () -> plainPermissionManager.updateAccessConfig(plainAccessConfig));
 
         plainAccessConfig.setSecretKey("12345678");
         // Invalid parameter
         plainAccessConfig.setGroupPerms(Lists.newArrayList("groupA!SUB"));
-        Assert.assertThrows(AclException.class, () -> plainPermissionManager.updateAccessConfig(plainAccessConfig));
+        assertThrows(AclException.class, () -> plainPermissionManager.updateAccessConfig(plainAccessConfig));
 
         // first update
         plainAccessConfig.setGroupPerms(Lists.newArrayList("groupA=SUB"));
@@ -376,4 +378,19 @@ public class PlainPermissionManagerTest {
         Assert.assertEquals(true, config.getGlobalWhiteAddrs().contains("192.168.1.2"));
     }
 
+    @Test
+    public void checkPermissionWithMultipleResourcesTest() {
+        // Create a PlainAccessResource with SUB permission for topicA and PUB permission for topicB
+        PlainAccessResource subAndPubResource = new PlainAccessResource();
+        subAndPubResource.addResourceAndPerm("topicA", Permission.SUB);
+        subAndPubResource.addResourceAndPerm("topicB", Permission.PUB);
+
+        // Create a PlainAccessResource with PUB permission for topicA and SUB permission for topicB
+        PlainAccessResource pubAndSubResource = new PlainAccessResource();
+        pubAndSubResource.addResourceAndPerm("topicA", Permission.PUB);
+        pubAndSubResource.addResourceAndPerm("topicB", Permission.SUB);
+
+        // Check if the checkPerm method correctly handles multiple resources with different permissions
+        assertThrows(AclException.class, () -> plainPermissionManager.checkPerm(subAndPubResource, pubAndSubResource));
+    }
 }

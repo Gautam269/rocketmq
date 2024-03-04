@@ -32,5 +32,4 @@ public class AclSignerTest {
         Assert.assertEquals(expectedSignature, AclSigner.calSignature("RocketMQ", "12345678"));
         Assert.assertEquals(expectedSignature, AclSigner.calSignature("RocketMQ".getBytes(), "12345678"));
     }
-
 }

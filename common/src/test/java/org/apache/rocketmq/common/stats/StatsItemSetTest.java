@@ -29,7 +29,7 @@ import org.apache.rocketmq.common.ThreadFactoryImpl;
 import org.junit.After;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class StatsItemSetTest {
 
@@ -139,8 +139,38 @@ public class StatsItemSetTest {
         return statsItemSet.getAndCreateStatsItem("test").getValue();
     }
 
-    @After
+/*    @After
     public void shutdown() {
         executor.shutdown();
+    }*/
+
+    @After
+    public void shutdown() {
+        if (executor != null) {
+            executor.shutdown();
+        }
     }
+
+    @Test
+        public void test_delValueByInfixKey() {
+        // Create MomentStatsItemSet instance for testing
+        MomentStatsItemSet statsItemSet = new MomentStatsItemSet("testStats", scheduler, null);
+
+        // Add some values with different keys
+        statsItemSet.setValue("prefix_test_suffix", 5);
+        statsItemSet.setValue("prefix_another_test_suffix", 10);
+        statsItemSet.setValue("different_key", 15);
+
+        // Delete values with keys containing "test"
+        statsItemSet.delValueByInfixKey("test", "_");
+
+        // Verify that only the values with "test" in their keys are deleted
+        assertNull(statsItemSet.getStatsItemTable().get("prefix_test_suffix"));
+        assertNull(statsItemSet.getStatsItemTable().get("prefix_another_test_suffix"));
+        assertNotNull(statsItemSet.getStatsItemTable().get("different_key"));
+
+        // Verify that the correct values are still present
+        assertEquals(15, statsItemSet.getStatsItemTable().get("different_key").getValue().intValue());
+    }
+
 }

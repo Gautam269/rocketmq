@@ -25,6 +25,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class CompressionTest {
 
@@ -103,4 +105,50 @@ public class CompressionTest {
     public void testCompressionUnsupportedType() {
         CompressionType.of("snappy");
     }
+
+    @Test
+    public void testFindByValueLZ4() {
+        // Arrange
+        int lz4Value = 1;
+
+        // Act
+        CompressionType lz4Type = CompressionType.findByValue(lz4Value);
+
+        // Assert
+        assertEquals(CompressionType.LZ4, lz4Type);
+    }
+
+    @Test
+    public void testFindByValueZSTD() {
+        // Arrange
+        int zstdValue = 2;
+
+        // Act
+        CompressionType zstdType = CompressionType.findByValue(zstdValue);
+
+        // Assert
+        assertEquals(CompressionType.ZSTD, zstdType);
+    }
+
+    @Test
+    public void testFindByValueZLIB() {
+        // Arrange
+        int zlibValue = 3;
+
+        // Act
+        CompressionType zlibType = CompressionType.findByValue(zlibValue);
+
+        // Assert
+        assertEquals(CompressionType.ZLIB, zlibType);
+    }
+
+    @Test
+    public void testFindByValueRuntimeException() {
+        // Arrange
+        int invalidValue = 4;
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> CompressionType.findByValue(invalidValue));
+    }
+
 }

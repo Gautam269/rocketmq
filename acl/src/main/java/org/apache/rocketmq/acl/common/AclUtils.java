@@ -38,6 +38,8 @@ public class AclUtils {
 
     private static final Logger log = LoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 
+    private IpAddressUtil ipAddressUtil = new IpAddressUtil();
+
     public static byte[] combineRequestContent(RemotingCommand request, SortedMap<String, String> fieldsMap) {
         try {
             StringBuilder sb = new StringBuilder("");
@@ -108,14 +110,14 @@ public class AclUtils {
             part = 7;
             subAddress = netAddress.substring(0, netAddress.lastIndexOf(':'));
         }
-        return expandIP(subAddress, part);
+        return IpAddressUtil.expandIP(subAddress, part);
     }
 
-    public static void verify(String netAddress, int index) {
+/*    public static void verify(String netAddress, int index) {
         if (!AclUtils.isScope(netAddress, index)) {
             throw new AclException(String.format("NetAddress examine scope Exception netAddress is %s", netAddress));
         }
-    }
+    }*/
 
     public static String[] getAddresses(String netAddress, String partialAddress) {
         String[] parAddStrArray = StringUtils.split(partialAddress.substring(1, partialAddress.length() - 1), ",");
@@ -130,7 +132,7 @@ public class AclUtils {
     public static boolean isScope(String netAddress, int index) {
 //        IPv6 Address
         if (isColon(netAddress)) {
-            netAddress = expandIP(netAddress, 8);
+            netAddress = IpAddressUtil.expandIP(netAddress, 8);
             String[] strArray = StringUtils.split(netAddress, ":");
             return isIPv6Scope(strArray, index);
         }
@@ -198,7 +200,7 @@ public class AclUtils {
         return num >= min && num <= max;
     }
 
-    public static String expandIP(String netAddress, int part) {
+    /*public static String expandIP(String netAddress, int part) {
         netAddress = netAddress.toUpperCase();
         // expand netAddress
         int separatorCount = StringUtils.countMatches(netAddress, ":");
@@ -228,7 +230,7 @@ public class AclUtils {
             }
         }
         return sb.toString();
-    }
+    }*/
 
     public static <T> T getYamlDataObject(String path, Class<T> clazz) {
         try (FileInputStream fis = new FileInputStream(path)) {

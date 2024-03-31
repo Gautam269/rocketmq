@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.MessageQueue;
 
 public class AssignedMessageQueue {
@@ -241,4 +243,22 @@ public class AssignedMessageQueue {
             this.seekOffset = seekOffset;
         }
     }
+
+    private DefaultLitePullConsumerImpl defaultLitePullConsumerImpl;
+    public long nextPullOffset(MessageQueue messageQueue) throws MQClientException {
+        long offset = -1;
+        long seekOffset = getSeekOffset(messageQueue);
+        if (seekOffset != -1) {
+            offset = seekOffset;
+            updateConsumeOffset(messageQueue, offset);
+            setSeekOffset(messageQueue, -1);
+        } else {
+            offset = getPullOffset(messageQueue);
+            if (offset == -1) {
+                offset = defaultLitePullConsumerImpl.fetchConsumeOffset(messageQueue);
+            }
+        }
+        return offset;
+    }
+
 }

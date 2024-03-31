@@ -47,7 +47,8 @@ public class PlainPermissionChecker implements PermissionChecker {
         for (Map.Entry<String, Byte> needCheckedEntry : needCheckedPermMap.entrySet()) {
             String resource = needCheckedEntry.getKey();
             Byte neededPerm = needCheckedEntry.getValue();
-            boolean isGroup = PlainAccessResource.isRetryTopic(resource);
+            //boolean isGroup = PlainAccessResource.isRetryTopic(resource);
+            boolean isGroup = RetryTopicUtil.isRetryTopic(resource);
 
             if (ownedPermMap == null || !ownedPermMap.containsKey(resource)) {
                 // Check the default perm

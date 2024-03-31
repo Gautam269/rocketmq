@@ -808,7 +808,7 @@ public class DefaultLitePullConsumerImpl implements MQConsumerInner {
         }
     }
 
-    private long fetchConsumeOffset(MessageQueue messageQueue) throws MQClientException {
+    public long fetchConsumeOffset(MessageQueue messageQueue) throws MQClientException {
         checkServiceState();
         long offset = this.rebalanceImpl.computePullFromWhereWithException(messageQueue);
         return offset;
@@ -836,7 +836,7 @@ public class DefaultLitePullConsumerImpl implements MQConsumerInner {
         }
     }
 
-    private long nextPullOffset(MessageQueue messageQueue) throws MQClientException {
+/*    private long nextPullOffset(MessageQueue messageQueue) throws MQClientException {
         long offset = -1;
         long seekOffset = assignedMessageQueue.getSeekOffset(messageQueue);
         if (seekOffset != -1) {
@@ -850,7 +850,7 @@ public class DefaultLitePullConsumerImpl implements MQConsumerInner {
             }
         }
         return offset;
-    }
+    }*/
 
     public long searchOffset(MessageQueue mq, long timestamp) throws MQClientException {
         checkServiceState();
@@ -941,7 +941,7 @@ public class DefaultLitePullConsumerImpl implements MQConsumerInner {
 
                 long offset = 0L;
                 try {
-                    offset = nextPullOffset(messageQueue);
+                    offset = assignedMessageQueue.nextPullOffset(messageQueue);
                 } catch (Exception e) {
                     log.error("Failed to get next pull offset", e);
                     scheduledThreadPoolExecutor.schedule(this, PULL_TIME_DELAY_MILLS_ON_EXCEPTION, TimeUnit.MILLISECONDS);

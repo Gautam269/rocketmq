@@ -103,7 +103,7 @@ public class MessageQueue implements Comparable<MessageQueue>, Serializable {
         return "MessageQueue [topic=" + topic + ", brokerName=" + brokerName + ", queueId=" + queueId + "]";
     }
 
-    @Override
+/*    @Override
     public int compareTo(MessageQueue o) {
         {
             int result = this.topic.compareTo(o.topic);
@@ -120,5 +120,24 @@ public class MessageQueue implements Comparable<MessageQueue>, Serializable {
         }
 
         return this.queueId - o.queueId;
+    }*/
+
+    @Override
+    public int compareTo(MessageQueue otherMessageQueue) {
+        {
+            int result = this.topic.compareTo(otherMessageQueue.topic);
+            if (result != 0) {
+                return result;
+            }
+        }
+
+        {
+            int result = this.brokerName.compareTo(otherMessageQueue.brokerName);
+            if (result != 0) {
+                return result;
+            }
+        }
+
+        return this.queueId - otherMessageQueue.queueId;
     }
 }

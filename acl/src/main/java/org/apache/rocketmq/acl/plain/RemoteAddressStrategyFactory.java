@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.rocketmq.acl.common.AclException;
 import org.apache.rocketmq.acl.common.AclUtils;
+import org.apache.rocketmq.acl.common.IpAddressUtil;
 import org.apache.rocketmq.common.constant.LoggerName;
 import org.apache.rocketmq.logging.org.slf4j.Logger;
 import org.apache.rocketmq.logging.org.slf4j.LoggerFactory;
@@ -33,6 +34,8 @@ public class RemoteAddressStrategyFactory {
     public static final NullRemoteAddressStrategy NULL_NET_ADDRESS_STRATEGY = new NullRemoteAddressStrategy();
 
     public static final BlankRemoteAddressStrategy BLANK_NET_ADDRESS_STRATEGY = new BlankRemoteAddressStrategy();
+
+    public static final IpAddressUtil ipAddressUtil = new IpAddressUtil();
 
     public RemoteAddressStrategy getRemoteAddressStrategy(PlainAccessResource plainAccessResource) {
         return getRemoteAddressStrategy(plainAccessResource.getWhiteRemoteAddress());
@@ -100,7 +103,8 @@ public class RemoteAddressStrategyFactory {
                 if (validator.isValidInet4Address(netAddress)) {
                     multipleSet.add(netAddress);
                 } else if (validator.isValidInet6Address(netAddress)) {
-                    multipleSet.add(AclUtils.expandIP(netAddress, 8));
+                    //multipleSet.add(AclUtils.expandIP(netAddress, 8));
+                    multipleSet.add(IpAddressUtil.expandIP(netAddress, 8));
                 } else {
                     throw new AclException(String.format("NetAddress examine Exception netAddress is %s", netAddress));
                 }
@@ -112,7 +116,8 @@ public class RemoteAddressStrategyFactory {
             InetAddressValidator validator = InetAddressValidator.getInstance();
             String whiteRemoteAddress = plainAccessResource.getWhiteRemoteAddress();
             if (validator.isValidInet6Address(whiteRemoteAddress)) {
-                whiteRemoteAddress = AclUtils.expandIP(whiteRemoteAddress, 8);
+                //whiteRemoteAddress = AclUtils.expandIP(whiteRemoteAddress, 8);\
+                whiteRemoteAddress = IpAddressUtil.expandIP(whiteRemoteAddress, 8);
             }
             return multipleSet.contains(whiteRemoteAddress);
         }
@@ -135,8 +140,10 @@ public class RemoteAddressStrategyFactory {
 
         @Override
         public boolean match(PlainAccessResource plainAccessResource) {
-            String writeRemoteAddress = AclUtils.expandIP(plainAccessResource.getWhiteRemoteAddress(), 8).toUpperCase();
-            return AclUtils.expandIP(netAddress, 8).toUpperCase().equals(writeRemoteAddress);
+/*            String writeRemoteAddress = AclUtils.expandIP(plainAccessResource.getWhiteRemoteAddress(), 8).toUpperCase();
+            return AclUtils.expandIP(netAddress, 8).toUpperCase().equals(writeRemoteAddress);*/
+            String writeRemoteAddress = IpAddressUtil.expandIP(plainAccessResource.getWhiteRemoteAddress(), 8).toUpperCase();
+            return IpAddressUtil.expandIP(netAddress, 8).toUpperCase().equals(writeRemoteAddress);
         }
 
     }
@@ -158,7 +165,8 @@ public class RemoteAddressStrategyFactory {
                 String[] strArray = StringUtils.split(remoteAddr, ":");
                 for (int i = 1; i < strArray.length; i++) {
                     if (ipv6Analysis(strArray, i)) {
-                        AclUtils.verify(remoteAddr, index - 1);
+                        //AclUtils.verify(remoteAddr, index - 1);
+                        IpAddressUtil.verify(remoteAddr, index - 1);
                         String preAddress = AclUtils.v6ipProcess(remoteAddr);
                         this.index = StringUtils.split(preAddress, ":").length;
                         this.head = preAddress;
@@ -168,7 +176,8 @@ public class RemoteAddressStrategyFactory {
             } else {
                 String[] strArray = StringUtils.split(remoteAddr, ".");
                 if (analysis(strArray, 1) || analysis(strArray, 2) || analysis(strArray, 3)) {
-                    AclUtils.verify(remoteAddr, index - 1);
+                    //AclUtils.verify(remoteAddr, index - 1);
+                    IpAddressUtil.verify(remoteAddr, index - 1);
                     StringBuilder sb = new StringBuilder();
                     for (int j = 0; j < index; j++) {
                         sb.append(strArray[j].trim()).append(".");
@@ -242,7 +251,8 @@ public class RemoteAddressStrategyFactory {
                     return address >= this.start && address <= this.end;
                 }
             } else if (validator.isValidInet6Address(netAddress)) {
-                netAddress = AclUtils.expandIP(netAddress, 8).toUpperCase();
+                //netAddress = AclUtils.expandIP(netAddress, 8).toUpperCase();
+                netAddress = IpAddressUtil.expandIP(netAddress, 8).toUpperCase();
                 if (netAddress.startsWith(this.head)) {
                     String value = netAddress.substring(5 * index, 5 * index + 4);
                     Integer address = Integer.parseInt(value, 16);

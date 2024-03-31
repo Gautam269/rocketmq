@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.acl.plain.PlainAccessResource;
+import org.apache.rocketmq.acl.plain.RetryTopicUtil;
 import org.apache.rocketmq.remoting.protocol.RequestCode;
 
 public class Permission {
@@ -74,7 +75,7 @@ public class Permission {
         }
     }
 
-    public static void parseResourcePerms(PlainAccessResource plainAccessResource, Boolean isTopic,
+/*    public static void parseResourcePerms(PlainAccessResource plainAccessResource, Boolean isTopic,
         List<String> resources) {
         if (resources == null || resources.isEmpty()) {
             return;
@@ -87,6 +88,46 @@ public class Permission {
                 throw new AclException(String.format("Parse resource permission failed for %s:%s", isTopic ? "topic" : "group", resource));
             }
         }
+    }*/
+
+    public static void parseResourcePerms(PlainAccessResource plainAccessResource, Boolean isTopic,
+                                          List<String> resources) {
+        if (resources == null || resources.isEmpty()) {
+            return;
+        }
+
+        for (String resource : resources) {
+            String[] items = StringUtils.split(resource, "=");
+            validateResourceFormat(items, isTopic, resource);
+            //String resourceName = isTopic ? items[0].trim() : PlainAccessResource.getRetryTopic(items[0].trim());
+            String resourceName = isTopic ? items[0].trim() : RetryTopicUtil.getRetryTopic(items[0].trim());
+            byte permission = parsePermission(items[1].trim());
+            plainAccessResource.addResourceAndPerm(resourceName, permission);
+        }
+    }
+
+    private static void validateResourceFormat(String[] items, Boolean isTopic, String resource) {
+        if (items.length != 2) {
+            String type = isTopic ? "topic" : "group";
+            throw new AclException(String.format("Parse Resource format error for %s.\n" +
+                    "The expected resource format is 'Res=Perm'. For example: topicA=SUB", resource));
+        }
+    }
+
+    private static byte parsePermission(String permString) {
+        if (!Permission.isValidPermission(permString)) {
+            throw new AclException(String.format("Parse resource permission error for %s.\n" +
+                    "The expected permissions are 'SUB' or 'PUB' or 'SUB|PUB' or 'PUB|SUB'.", permString));
+        }
+        return Permission.parsePermFromString(permString);
+    }
+
+    private static boolean isValidPermission(String permString) {
+        return permString.equals(AclConstants.PUB) ||
+                permString.equals(AclConstants.SUB) ||
+                permString.equals(AclConstants.PUB_SUB) ||
+                permString.equals(AclConstants.SUB_PUB) ||
+                permString.equals(AclConstants.DENY);
     }
 
     public static void checkResourcePerms(List<String> resources) {

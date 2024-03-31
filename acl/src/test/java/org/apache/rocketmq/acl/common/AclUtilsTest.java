@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.acl.plain.PlainAccessData;
 import org.apache.rocketmq.common.PlainAccessConfig;
 import org.apache.rocketmq.remoting.RPCHook;
+import org.apache.rocketmq.acl.common.IpAddressUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -80,6 +81,7 @@ public class AclUtilsTest {
 
     @Test
     public void testIsScope_Array() {
+        IpAddressUtil ipAddressUtil = new IpAddressUtil();
         String[] address = StringUtils.split("12.12.12.12", ".");
         boolean isScope = AclUtils.isScope(address, 4);
         Assert.assertTrue(isScope);
@@ -105,7 +107,8 @@ public class AclUtilsTest {
         isScope = AclUtils.isIPv6Scope(address, 4);
         Assert.assertTrue(isScope);
 
-        address = StringUtils.split(AclUtils.expandIP("1050::0005:akkg:300c:326b", 8), ":");
+        //address = StringUtils.split(AclUtils.expandIP("1050::0005:akkg:300c:326b", 8), ":");
+        address = StringUtils.split(IpAddressUtil.expandIP("1050::0005:akkg:300c:326b", 8), ":");
         isScope = AclUtils.isIPv6Scope(address, 8);
         Assert.assertFalse(isScope);
         isScope = AclUtils.isIPv6Scope(address, 4);
@@ -191,14 +194,27 @@ public class AclUtilsTest {
 
     @Test
     public void testExpandIP() {
-        Assert.assertEquals(AclUtils.expandIP("::", 8), "0000:0000:0000:0000:0000:0000:0000:0000");
+
+        IpAddressUtil ipAddressUtil = new IpAddressUtil();
+
+/*        Assert.assertEquals(AclUtils.expandIP("::", 8), "0000:0000:0000:0000:0000:0000:0000:0000");
         Assert.assertEquals(AclUtils.expandIP("::1", 8), "0000:0000:0000:0000:0000:0000:0000:0001");
         Assert.assertEquals(AclUtils.expandIP("3::", 8), "0003:0000:0000:0000:0000:0000:0000:0000");
         Assert.assertEquals(AclUtils.expandIP("2::2", 8), "0002:0000:0000:0000:0000:0000:0000:0002");
         Assert.assertEquals(AclUtils.expandIP("4::aac4:92", 8), "0004:0000:0000:0000:0000:0000:AAC4:0092");
         Assert.assertEquals(AclUtils.expandIP("ab23:56:901a::cc6:765:bb:9011", 8), "AB23:0056:901A:0000:0CC6:0765:00BB:9011");
         Assert.assertEquals(AclUtils.expandIP("ab23:56:901a:1:cc6:765:bb:9011", 8), "AB23:0056:901A:0001:0CC6:0765:00BB:9011");
-        Assert.assertEquals(AclUtils.expandIP("5::7:6", 6), "0005:0000:0000:0000:0007:0006");
+        Assert.assertEquals(AclUtils.expandIP("5::7:6", 6), "0005:0000:0000:0000:0007:0006");*/
+
+        Assert.assertEquals(IpAddressUtil.expandIP("::", 8), "0000:0000:0000:0000:0000:0000:0000:0000");
+        Assert.assertEquals(IpAddressUtil.expandIP("::1", 8), "0000:0000:0000:0000:0000:0000:0000:0001");
+        Assert.assertEquals(IpAddressUtil.expandIP("3::", 8), "0003:0000:0000:0000:0000:0000:0000:0000");
+        Assert.assertEquals(IpAddressUtil.expandIP("2::2", 8), "0002:0000:0000:0000:0000:0000:0000:0002");
+        Assert.assertEquals(IpAddressUtil.expandIP("4::aac4:92", 8), "0004:0000:0000:0000:0000:0000:AAC4:0092");
+        Assert.assertEquals(IpAddressUtil.expandIP("ab23:56:901a::cc6:765:bb:9011", 8), "AB23:0056:901A:0000:0CC6:0765:00BB:9011");
+        Assert.assertEquals(IpAddressUtil.expandIP("ab23:56:901a:1:cc6:765:bb:9011", 8), "AB23:0056:901A:0001:0CC6:0765:00BB:9011");
+        Assert.assertEquals(IpAddressUtil.expandIP("5::7:6", 6), "0005:0000:0000:0000:0007:0006");
+
     }
 
     @SuppressWarnings("unchecked")

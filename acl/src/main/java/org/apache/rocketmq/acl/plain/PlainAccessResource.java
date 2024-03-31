@@ -63,6 +63,7 @@ import org.apache.rocketmq.remoting.protocol.header.UpdateConsumerOffsetRequestH
 import org.apache.rocketmq.remoting.protocol.heartbeat.ConsumerData;
 import org.apache.rocketmq.remoting.protocol.heartbeat.HeartbeatData;
 import org.apache.rocketmq.remoting.protocol.heartbeat.SubscriptionData;
+import org.apache.rocketmq.acl.plain.RetryTopicUtil;
 
 public class PlainAccessResource implements AccessResource {
 
@@ -94,6 +95,8 @@ public class PlainAccessResource implements AccessResource {
 
     private String recognition;
 
+    public static final RetryTopicUtil retryTopicUtil = new RetryTopicUtil();
+
     public PlainAccessResource() {
     }
 
@@ -120,8 +123,10 @@ public class PlainAccessResource implements AccessResource {
             switch (request.getCode()) {
                 case RequestCode.SEND_MESSAGE:
                     final String topic = request.getExtFields().get("topic");
-                    if (PlainAccessResource.isRetryTopic(topic)) {
-                        accessResource.addResourceAndPerm(getRetryTopic(request.getExtFields().get("group")), Permission.SUB);
+                    //if (PlainAccessResource.isRetryTopic(topic)) {
+                    if (RetryTopicUtil.isRetryTopic(topic)) {
+                        //accessResource.addResourceAndPerm(getRetryTopic(request.getExtFields().get("group")), Permission.SUB);
+                        accessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic(request.getExtFields().get("group")), Permission.SUB);
                     } else {
                         accessResource.addResourceAndPerm(topic, Permission.PUB);
                     }
@@ -129,18 +134,22 @@ public class PlainAccessResource implements AccessResource {
                 case RequestCode.SEND_MESSAGE_V2:
                 case RequestCode.SEND_BATCH_MESSAGE:
                     final String topicV2 = request.getExtFields().get("b");
-                    if (PlainAccessResource.isRetryTopic(topicV2)) {
-                        accessResource.addResourceAndPerm(getRetryTopic(request.getExtFields().get("a")), Permission.SUB);
+                    //if (PlainAccessResource.isRetryTopic(topicV2)) {
+                    if (RetryTopicUtil.isRetryTopic(topicV2)) {
+                        //accessResource.addResourceAndPerm(getRetryTopic(request.getExtFields().get("a")), Permission.SUB);
+                        accessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic(request.getExtFields().get("a")), Permission.SUB);
                     } else {
                         accessResource.addResourceAndPerm(topicV2, Permission.PUB);
                     }
                     break;
                 case RequestCode.CONSUMER_SEND_MSG_BACK:
-                    accessResource.addResourceAndPerm(getRetryTopic(request.getExtFields().get("group")), Permission.SUB);
+                    //accessResource.addResourceAndPerm(getRetryTopic(request.getExtFields().get("group")), Permission.SUB);
+                    accessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic(request.getExtFields().get("group")), Permission.SUB);
                     break;
                 case RequestCode.PULL_MESSAGE:
                     accessResource.addResourceAndPerm(request.getExtFields().get("topic"), Permission.SUB);
-                    accessResource.addResourceAndPerm(getRetryTopic(request.getExtFields().get("consumerGroup")), Permission.SUB);
+                    //accessResource.addResourceAndPerm(getRetryTopic(request.getExtFields().get("consumerGroup")), Permission.SUB);
+                    accessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic(request.getExtFields().get("consumerGroup")), Permission.SUB);
                     break;
                 case RequestCode.QUERY_MESSAGE:
                     accessResource.addResourceAndPerm(request.getExtFields().get("topic"), Permission.SUB);
@@ -148,7 +157,8 @@ public class PlainAccessResource implements AccessResource {
                 case RequestCode.HEART_BEAT:
                     HeartbeatData heartbeatData = HeartbeatData.decode(request.getBody(), HeartbeatData.class);
                     for (ConsumerData data : heartbeatData.getConsumerDataSet()) {
-                        accessResource.addResourceAndPerm(getRetryTopic(data.getGroupName()), Permission.SUB);
+                        //accessResource.addResourceAndPerm(getRetryTopic(data.getGroupName()), Permission.SUB);
+                        accessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic(data.getGroupName()), Permission.SUB);
                         for (SubscriptionData subscriptionData : data.getSubscriptionDataSet()) {
                             accessResource.addResourceAndPerm(subscriptionData.getTopic(), Permission.SUB);
                         }
@@ -158,19 +168,22 @@ public class PlainAccessResource implements AccessResource {
                     final UnregisterClientRequestHeader unregisterClientRequestHeader =
                         (UnregisterClientRequestHeader) request
                             .decodeCommandCustomHeader(UnregisterClientRequestHeader.class);
-                    accessResource.addResourceAndPerm(getRetryTopic(unregisterClientRequestHeader.getConsumerGroup()), Permission.SUB);
+                    //accessResource.addResourceAndPerm(getRetryTopic(unregisterClientRequestHeader.getConsumerGroup()), Permission.SUB);
+                    accessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic(unregisterClientRequestHeader.getConsumerGroup()), Permission.SUB);
                     break;
                 case RequestCode.GET_CONSUMER_LIST_BY_GROUP:
                     final GetConsumerListByGroupRequestHeader getConsumerListByGroupRequestHeader =
                         (GetConsumerListByGroupRequestHeader) request
                             .decodeCommandCustomHeader(GetConsumerListByGroupRequestHeader.class);
-                    accessResource.addResourceAndPerm(getRetryTopic(getConsumerListByGroupRequestHeader.getConsumerGroup()), Permission.SUB);
+                    //accessResource.addResourceAndPerm(getRetryTopic(getConsumerListByGroupRequestHeader.getConsumerGroup()), Permission.SUB);
+                    accessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic(getConsumerListByGroupRequestHeader.getConsumerGroup()), Permission.SUB);
                     break;
                 case RequestCode.UPDATE_CONSUMER_OFFSET:
                     final UpdateConsumerOffsetRequestHeader updateConsumerOffsetRequestHeader =
                         (UpdateConsumerOffsetRequestHeader) request
                             .decodeCommandCustomHeader(UpdateConsumerOffsetRequestHeader.class);
-                    accessResource.addResourceAndPerm(getRetryTopic(updateConsumerOffsetRequestHeader.getConsumerGroup()), Permission.SUB);
+                    //accessResource.addResourceAndPerm(getRetryTopic(updateConsumerOffsetRequestHeader.getConsumerGroup()), Permission.SUB);
+                    accessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic(updateConsumerOffsetRequestHeader.getConsumerGroup()), Permission.SUB);
                     accessResource.addResourceAndPerm(updateConsumerOffsetRequestHeader.getTopic(), Permission.SUB);
                     break;
                 default:
@@ -302,7 +315,8 @@ public class PlainAccessResource implements AccessResource {
 
     private void addGroupResourceAndPerm(Resource resource, byte permission) {
         String resourceName = NamespaceUtil.wrapNamespace(resource.getResourceNamespace(), resource.getName());
-        addResourceAndPerm(getRetryTopic(resourceName), permission);
+        //addResourceAndPerm(getRetryTopic(resourceName), permission);
+        addResourceAndPerm(RetryTopicUtil.getRetryTopic(resourceName), permission);
     }
 
     public static PlainAccessResource build(PlainAccessConfig plainAccessConfig, RemoteAddressStrategy remoteAddressStrategy) {
@@ -323,22 +337,23 @@ public class PlainAccessResource implements AccessResource {
         return plainAccessResource;
     }
 
-    public static boolean isRetryTopic(String topic) {
+/*    public static boolean isRetryTopic(String topic) {
         return null != topic && topic.startsWith(MixAll.RETRY_GROUP_TOPIC_PREFIX);
-    }
+    }*/
 
     public static String printStr(String resource, boolean isGroup) {
         if (resource == null) {
             return null;
         }
         if (isGroup) {
-            return String.format("%s:%s", "group", getGroupFromRetryTopic(resource));
+            //return String.format("%s:%s", "group", getGroupFromRetryTopic(resource));
+            return String.format("%s:%s", "group", RetryTopicUtil.getGroupFromRetryTopic(resource));
         } else {
             return String.format("%s:%s", "topic", resource);
         }
     }
 
-    public static String getGroupFromRetryTopic(String retryTopic) {
+/*    public static String getGroupFromRetryTopic(String retryTopic) {
         if (retryTopic == null) {
             return null;
         }
@@ -350,7 +365,7 @@ public class PlainAccessResource implements AccessResource {
             return null;
         }
         return MixAll.getRetryTopic(group);
-    }
+    }*/
 
     public void addResourceAndPerm(String resource, byte perm) {
         if (resource == null) {

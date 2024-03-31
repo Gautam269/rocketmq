@@ -89,10 +89,15 @@ public class PlainPermissionManagerTest {
         painAccessResource.setWhiteRemoteAddress("127.0." + perm + ".*");
         painAccessResource.setDefaultGroupPerm(perm);
         painAccessResource.setDefaultTopicPerm(perm);
-        painAccessResource.addResourceAndPerm(PlainAccessResource.getRetryTopic("groupA"), Permission.PUB);
+/*        painAccessResource.addResourceAndPerm(PlainAccessResource.getRetryTopic("groupA"), Permission.PUB);
         painAccessResource.addResourceAndPerm(PlainAccessResource.getRetryTopic("groupB"), Permission.SUB);
         painAccessResource.addResourceAndPerm(PlainAccessResource.getRetryTopic("groupC"), Permission.ANY);
-        painAccessResource.addResourceAndPerm(PlainAccessResource.getRetryTopic("groupD"), Permission.DENY);
+        painAccessResource.addResourceAndPerm(PlainAccessResource.getRetryTopic("groupD"), Permission.DENY);*/
+
+        painAccessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic("groupA"), Permission.PUB);
+        painAccessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic("groupB"), Permission.SUB);
+        painAccessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic("groupC"), Permission.ANY);
+        painAccessResource.addResourceAndPerm(RetryTopicUtil.getRetryTopic("groupD"), Permission.DENY);
 
         painAccessResource.addResourceAndPerm("topicA", Permission.PUB);
         painAccessResource.addResourceAndPerm("topicB", Permission.SUB);
@@ -129,9 +134,13 @@ public class PlainPermissionManagerTest {
         Map<String, Byte> resourcePermMap = plainAccessResource.getResourcePermMap();
         Assert.assertEquals(resourcePermMap.size(), 3);
 
-        Assert.assertEquals(resourcePermMap.get(PlainAccessResource.getRetryTopic("groupA")).byteValue(), Permission.DENY);
+        /*Assert.assertEquals(resourcePermMap.get(PlainAccessResource.getRetryTopic("groupA")).byteValue(), Permission.DENY);
         Assert.assertEquals(resourcePermMap.get(PlainAccessResource.getRetryTopic("groupB")).byteValue(), Permission.PUB | Permission.SUB);
-        Assert.assertEquals(resourcePermMap.get(PlainAccessResource.getRetryTopic("groupC")).byteValue(), Permission.PUB);
+        Assert.assertEquals(resourcePermMap.get(PlainAccessResource.getRetryTopic("groupC")).byteValue(), Permission.PUB);*/
+
+        Assert.assertEquals(resourcePermMap.get(RetryTopicUtil.getRetryTopic("groupA")).byteValue(), Permission.DENY);
+        Assert.assertEquals(resourcePermMap.get(RetryTopicUtil.getRetryTopic("groupB")).byteValue(), Permission.PUB | Permission.SUB);
+        Assert.assertEquals(resourcePermMap.get(RetryTopicUtil.getRetryTopic("groupC")).byteValue(), Permission.PUB);
 
         List<String> topics = new ArrayList<>();
         topics.add("topicA=DENY");

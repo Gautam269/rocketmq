@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.rocketmq.acl.plain.PlainAccessResource;
+import org.apache.rocketmq.acl.plain.RetryTopicUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -108,13 +109,16 @@ public class PermissionTest {
         Permission.parseResourcePerms(plainAccessResource, false, groups);
         resourcePermMap = plainAccessResource.getResourcePermMap();
 
-        byte perm = resourcePermMap.get(PlainAccessResource.getRetryTopic("groupA"));
+        //byte perm = resourcePermMap.get(PlainAccessResource.getRetryTopic("groupA"));
+        byte perm = resourcePermMap.get(RetryTopicUtil.getRetryTopic("groupA"));
         Assert.assertEquals(perm, Permission.DENY);
 
-        perm = resourcePermMap.get(PlainAccessResource.getRetryTopic("groupB"));
+        //perm = resourcePermMap.get(PlainAccessResource.getRetryTopic("groupB"));
+        perm = resourcePermMap.get(RetryTopicUtil.getRetryTopic("groupB"));
         Assert.assertEquals(perm,Permission.PUB | Permission.SUB);
 
-        perm = resourcePermMap.get(PlainAccessResource.getRetryTopic("groupC"));
+        //perm = resourcePermMap.get(PlainAccessResource.getRetryTopic("groupC"));
+        perm = resourcePermMap.get(RetryTopicUtil.getRetryTopic("groupC"));
         Assert.assertEquals(perm, Permission.PUB);
 
         List<String> topics = new ArrayList<>();

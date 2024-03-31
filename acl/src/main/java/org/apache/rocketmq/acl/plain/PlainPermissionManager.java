@@ -579,7 +579,7 @@ public class PlainPermissionManager {
         this.globalWhiteRemoteAddressStrategy.clear();
     }
 
-    public void checkPlainAccessConfig(PlainAccessConfig plainAccessConfig) throws AclException {
+/*    public void checkPlainAccessConfig(PlainAccessConfig plainAccessConfig) throws AclException {
         if (plainAccessConfig.getAccessKey() == null
             || plainAccessConfig.getSecretKey() == null
             || plainAccessConfig.getAccessKey().length() <= AclConstants.ACCESS_KEY_MIN_LENGTH
@@ -588,7 +588,28 @@ public class PlainPermissionManager {
                 "The accessKey=%s and secretKey=%s cannot be null and length should longer than 6",
                 plainAccessConfig.getAccessKey(), plainAccessConfig.getSecretKey()));
         }
+    }*/
+
+    public void checkPlainAccessConfig(PlainAccessConfig plainAccessConfig) throws AclException {
+        if (!hasValidAccessKey(plainAccessConfig)) {
+            throw new AclException("Invalid accessKey: cannot be null or shorter than 7 characters");
+        }
+
+        if (!hasValidSecretKey(plainAccessConfig)) {
+            throw new AclException("Invalid secretKey: cannot be null or shorter than 7 characters");
+        }
     }
+
+    private boolean hasValidAccessKey(PlainAccessConfig plainAccessConfig) {
+        return plainAccessConfig.getAccessKey() != null &&
+                plainAccessConfig.getAccessKey().length() > AclConstants.ACCESS_KEY_MIN_LENGTH;
+    }
+
+    private boolean hasValidSecretKey(PlainAccessConfig plainAccessConfig) {
+        return plainAccessConfig.getSecretKey() != null &&
+                plainAccessConfig.getSecretKey().length() > AclConstants.SECRET_KEY_MIN_LENGTH;
+    }
+
 
     public PlainAccessResource buildPlainAccessResource(PlainAccessConfig plainAccessConfig) throws AclException {
         checkPlainAccessConfig(plainAccessConfig);

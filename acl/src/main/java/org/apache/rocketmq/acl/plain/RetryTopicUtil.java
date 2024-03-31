@@ -19,6 +19,7 @@ public class RetryTopicUtil {
         return KeyBuilder.parseGroup(retryTopic);
     }
 
+
     public static String getRetryTopic(String group) {
         if (group == null) {
             return null;
